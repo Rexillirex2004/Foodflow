@@ -1,0 +1,27 @@
+{
+  "expo": {
+    "name": "FoodFlow",
+    "slug": "foodflow",
+    "scheme": "foodflow",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "backgroundColor": "#0F172A"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.foodflow.app"
+    },
+    "android": {
+      "package": "com.foodflow.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#0F172A"
+      }
+    },
+    "web": {
+      "bundler": "metro"
+    }
+  }
+}

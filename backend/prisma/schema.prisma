@@ -1,0 +1,179 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Los campos de tipo "enum" se modelan como String (en vez de enums nativos
+// de Postgres) con los valores válidos documentados aquí y reforzados en
+// TypeScript (ver src/types/enums.ts) y en las validaciones Zod de cada
+// módulo. Se mantiene así por simplicidad y portabilidad del schema.
+//
+// Role:               OWNER | ADMIN | WAITER | CASHIER | KITCHEN
+// SubscriptionStatus:  TRIAL | ACTIVE | EXPIRED | CANCELED
+// TableStatus:         FREE | OCCUPIED | PENDING_PAYMENT
+// OrderStatus:         OPEN | IN_PROGRESS | READY | SERVED | CLOSED | CANCELLED
+// PaymentMethod:       CASH | CARD
+
+// ---------- MODELOS ----------
+
+model Restaurant {
+  id        String   @id @default(cuid())
+  name      String
+  address   String?
+  phone     String?
+  taxRate   Float    @default(0.13)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users          User[]
+  subscription   Subscription?
+  menuCategories MenuCategory[]
+  menuItems      MenuItem[]
+  tables         Table[]
+  orders         Order[]
+  invoices       Invoice[]
+}
+
+model User {
+  id           String   @id @default(cuid())
+  restaurantId String
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         String
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  ordersAsWaiter    Order[]   @relation("WaiterOrders")
+  invoicesAsCashier Invoice[] @relation("CashierInvoices")
+
+  @@index([restaurantId])
+}
+
+model Subscription {
+  id               String     @id @default(cuid())
+  restaurantId     String     @unique
+  restaurant       Restaurant @relation(fields: [restaurantId], references: [id])
+  status           String     @default("TRIAL")
+  planName         String     @default("FoodFlow Pro")
+  priceCents       Int        @default(2999)
+  trialEndsAt      DateTime
+  currentPeriodEnd DateTime?
+  lastPaymentAt    DateTime?
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+}
+
+model MenuCategory {
+  id           String     @id @default(cuid())
+  restaurantId String
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+  name         String
+  sortOrder    Int        @default(0)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  menuItems MenuItem[]
+
+  @@index([restaurantId])
+}
+
+model MenuItem {
+  id           String       @id @default(cuid())
+  restaurantId String
+  restaurant   Restaurant   @relation(fields: [restaurantId], references: [id])
+  categoryId   String
+  category     MenuCategory @relation(fields: [categoryId], references: [id])
+  name         String
+  description  String?
+  price        Float
+  imageUrl     String?
+  available    Boolean      @default(true)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  orderItems OrderItem[]
+
+  @@index([restaurantId])
+  @@index([categoryId])
+}
+
+model Table {
+  id           String     @id @default(cuid())
+  restaurantId String
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+  name         String
+  capacity     Int?
+  status       String     @default("FREE")
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  orders Order[]
+
+  @@unique([restaurantId, name])
+  @@index([restaurantId])
+}
+
+model Order {
+  id           String     @id @default(cuid())
+  restaurantId String
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+  tableId      String
+  table        Table      @relation(fields: [tableId], references: [id])
+  waiterId     String
+  waiter       User       @relation("WaiterOrders", fields: [waiterId], references: [id])
+  status       String     @default("OPEN")
+  notes        String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  closedAt     DateTime?
+
+  items   OrderItem[]
+  invoice Invoice?
+
+  @@index([restaurantId])
+  @@index([tableId])
+}
+
+model OrderItem {
+  id           String   @id @default(cuid())
+  restaurantId String
+  orderId      String
+  order        Order    @relation(fields: [orderId], references: [id])
+  menuItemId   String
+  menuItem     MenuItem @relation(fields: [menuItemId], references: [id])
+  quantity     Int
+  unitPrice    Float
+  notes        String?
+  createdAt    DateTime @default(now())
+
+  @@index([orderId])
+  @@index([restaurantId])
+}
+
+model Invoice {
+  id            String        @id @default(cuid())
+  restaurantId  String
+  restaurant    Restaurant    @relation(fields: [restaurantId], references: [id])
+  orderId       String        @unique
+  order         Order         @relation(fields: [orderId], references: [id])
+  invoiceNumber Int
+  cashierId     String
+  cashier       User          @relation("CashierInvoices", fields: [cashierId], references: [id])
+  subtotal      Float
+  taxRate       Float
+  taxAmount     Float
+  tipAmount     Float    @default(0)
+  total         Float
+  paymentMethod String
+  createdAt     DateTime @default(now())
+
+  @@unique([restaurantId, invoiceNumber])
+  @@index([restaurantId])
+}
