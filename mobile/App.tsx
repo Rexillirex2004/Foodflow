@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Text, TextInput, View } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -6,6 +6,7 @@ import { useFonts, Poppins_400Regular, Poppins_600SemiBold, Poppins_700Bold } fr
 import { AuthProvider } from "./src/context/AuthContext";
 import { RootNavigator } from "./src/navigation/RootNavigator";
 import { colors } from "./src/components/ui";
+import { SplashScreen } from "./src/components/SplashScreen";
 
 // Aplica la tipografía de marca (Poppins) a todo <Text>/<TextInput> de la app
 // sin tener que tocar cada pantalla individualmente.
@@ -20,6 +21,7 @@ function applyDefaultFont() {
 
 export default function App() {
   const [fontsLoaded] = useFonts({ Poppins_400Regular, Poppins_600SemiBold, Poppins_700Bold });
+  const [showSplash, setShowSplash] = useState(true);
 
   if (fontsLoaded) {
     applyDefaultFont();
@@ -33,6 +35,7 @@ export default function App() {
         <RootNavigator />
       </AuthProvider>
       <StatusBar style="dark" />
+      {showSplash && <SplashScreen onFinish={() => setShowSplash(false)} />}
     </SafeAreaProvider>
   );
 }
