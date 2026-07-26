@@ -21,6 +21,7 @@ export function createItem(input: {
   description?: string;
   price: number;
   imageUrl?: string;
+  available?: boolean;
 }) {
   return client.post<MenuItem>("/menu/items", input).then((r) => r.data);
 }

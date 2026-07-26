@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import { Alert, Text } from "react-native";
+import { Alert, Text, View } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useAuth } from "../../context/AuthContext";
 import { AuthStackParamList } from "../../navigation/types";
 import { Screen, Title, Subtitle, Input, Button, colors } from "../../components/ui";
+import { Logo } from "../../components/Logo";
 
 type Props = NativeStackScreenProps<AuthStackParamList, "Register">;
 
@@ -28,7 +29,10 @@ export function RegisterScreen({ navigation }: Props) {
 
   return (
     <Screen>
-      <Title>Crea tu restaurante</Title>
+      <View style={{ alignItems: "center", marginTop: 16, marginBottom: 8 }}>
+        <Logo size={64} />
+        <Title>Crea tu restaurante</Title>
+      </View>
       <Subtitle>14 días de prueba gratis, sin tarjeta</Subtitle>
 
       <Input

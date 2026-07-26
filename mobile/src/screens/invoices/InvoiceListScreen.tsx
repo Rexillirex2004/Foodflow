@@ -52,7 +52,9 @@ export function InvoiceListScreen({ navigation }: Props) {
           <Pressable onPress={() => navigation.navigate("CreateInvoice", { orderId: item.id })}>
             <Card>
               <Text style={{ color: colors.text, fontWeight: "700" }}>{item.table.name}</Text>
-              <Text style={{ color: colors.subtext }}>{item.items.length} platos · toca para cobrar</Text>
+              <Text style={{ color: colors.subtext }}>
+                {item.items.length} {item.items.length === 1 ? "producto" : "productos"} · toca para cobrar
+              </Text>
             </Card>
           </Pressable>
         )}
@@ -70,7 +72,7 @@ export function InvoiceListScreen({ navigation }: Props) {
           <Card>
             <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
               <Text style={{ color: colors.text, fontWeight: "600" }}>Factura #{item.invoiceNumber}</Text>
-              <Text style={{ color: colors.primary, fontWeight: "700" }}>${item.total.toFixed(2)}</Text>
+              <Text style={{ color: colors.success, fontWeight: "700" }}>${item.total.toFixed(2)}</Text>
             </View>
             <Text style={{ color: colors.subtext, marginTop: 2 }}>
               {item.order.table.name} · {new Date(item.createdAt).toLocaleString()}

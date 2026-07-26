@@ -10,7 +10,7 @@ import { Screen, Card, Button, EmptyState, colors } from "../../components/ui";
 type Props = NativeStackScreenProps<MenuStackParamList, "MenuItems">;
 
 export function MenuItemsScreen({ route, navigation }: Props) {
-  const { categoryId } = route.params;
+  const { categoryId, categoryName } = route.params;
   const [items, setItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -54,17 +54,25 @@ export function MenuItemsScreen({ route, navigation }: Props) {
               <View style={{ flex: 1 }}>
                 <Text style={{ color: colors.text, fontSize: 16, fontWeight: "600" }}>{item.name}</Text>
                 {!!item.description && <Text style={{ color: colors.subtext, marginTop: 2 }}>{item.description}</Text>}
-                <Text style={{ color: colors.primary, marginTop: 6, fontWeight: "700" }}>
+                <Text style={{ color: colors.success, marginTop: 6, fontWeight: "700" }}>
                   ${item.price.toFixed(2)}
                 </Text>
               </View>
-              <Switch value={item.available} onValueChange={() => toggleAvailability(item)} />
+              <Switch
+                value={item.available}
+                onValueChange={() => toggleAvailability(item)}
+                trackColor={{ false: colors.border, true: colors.success }}
+                thumbColor={colors.surface}
+              />
             </View>
           </Card>
         )}
       />
 
-      <Button title="Agregar plato" onPress={() => navigation.navigate("MenuItemForm", { categoryId })} />
+      <Button
+        title="Agregar plato"
+        onPress={() => navigation.navigate("MenuItemForm", { categoryId, categoryName })}
+      />
     </Screen>
   );
 }

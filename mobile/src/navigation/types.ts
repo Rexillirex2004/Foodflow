@@ -11,7 +11,7 @@ export type TablesStackParamList = {
 export type MenuStackParamList = {
   MenuCategories: undefined;
   MenuItems: { categoryId: string; categoryName: string };
-  MenuItemForm: { categoryId: string };
+  MenuItemForm: { categoryId: string; categoryName?: string };
 };
 
 export type KitchenStackParamList = {

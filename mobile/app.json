@@ -8,7 +8,7 @@
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
-      "backgroundColor": "#0F172A"
+      "backgroundColor": "#FAF5EC"
     },
     "ios": {
       "supportsTablet": true,
@@ -17,11 +17,15 @@
     "android": {
       "package": "com.foodflow.app",
       "adaptiveIcon": {
-        "backgroundColor": "#0F172A"
+        "backgroundColor": "#5C4433"
       }
     },
     "web": {
-      "bundler": "metro"
-    }
+      "bundler": "metro",
+      "lang": "es"
+    },
+    "plugins": [
+      "expo-font"
+    ]
   }
 }

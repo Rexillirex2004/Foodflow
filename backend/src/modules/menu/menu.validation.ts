@@ -16,6 +16,7 @@ export const createItemSchema = z.object({
   description: z.string().optional(),
   price: z.number().positive(),
   imageUrl: z.string().url().optional(),
+  available: z.boolean().optional(),
 });
 
 export const updateItemSchema = z.object({

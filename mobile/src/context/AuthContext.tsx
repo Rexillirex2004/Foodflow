@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useMemo, useState, useCallback } from "react";
-import * as SecureStore from "expo-secure-store";
+import * as TokenStorage from "../api/tokenStorage";
 import { TOKEN_KEY } from "../api/client";
 import * as authApi from "../api/auth.api";
 import * as subscriptionApi from "../api/subscription.api";
@@ -42,7 +42,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [subscription, setSubscription] = useState<Subscription | null>(null);
 
   const clearSession = useCallback(async () => {
-    await SecureStore.deleteItemAsync(TOKEN_KEY);
+    await TokenStorage.deleteItemAsync(TOKEN_KEY);
     setUser(null);
     setRestaurant(null);
     setSubscription(null);
@@ -50,7 +50,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     (async () => {
-      const token = await SecureStore.getItemAsync(TOKEN_KEY);
+      const token = await TokenStorage.getItemAsync(TOKEN_KEY);
       if (token) {
         try {
           const data = await authApi.me();
@@ -80,7 +80,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = useCallback(async (email: string, password: string) => {
     const data = await authApi.login(email, password);
-    await SecureStore.setItemAsync(TOKEN_KEY, data.token);
+    await TokenStorage.setItemAsync(TOKEN_KEY, data.token);
     setUser(data.user);
     setRestaurant(data.restaurant);
     setSubscription(data.subscription);
@@ -89,7 +89,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const register = useCallback(
     async (input: { restaurantName: string; ownerName: string; email: string; password: string }) => {
       const data = await authApi.register(input);
-      await SecureStore.setItemAsync(TOKEN_KEY, data.token);
+      await TokenStorage.setItemAsync(TOKEN_KEY, data.token);
       setUser(data.user);
       setRestaurant(data.restaurant);
       setSubscription(data.subscription);

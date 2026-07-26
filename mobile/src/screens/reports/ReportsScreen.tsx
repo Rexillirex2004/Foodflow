@@ -40,7 +40,7 @@ export function ReportsScreen() {
       <View style={{ flexDirection: "row", gap: 12, marginTop: 16, marginBottom: 8 }}>
         <Card style={{ flex: 1 }}>
           <Text style={{ color: colors.subtext }}>Ingresos</Text>
-          <Text style={{ color: colors.primary, fontSize: 20, fontWeight: "700" }}>
+          <Text style={{ color: colors.success, fontSize: 20, fontWeight: "700" }}>
             ${(summary?.totalRevenue ?? 0).toFixed(2)}
           </Text>
         </Card>

@@ -1,6 +1,6 @@
 import axios from "axios";
 import { Platform } from "react-native";
-import * as SecureStore from "expo-secure-store";
+import * as TokenStorage from "./tokenStorage";
 import { emit } from "./authEvents";
 
 // Prioridad: variable de entorno explícita > fallback por plataforma.
@@ -19,7 +19,7 @@ export const TOKEN_KEY = "foodflow_token";
 export const client = axios.create({ baseURL: API_URL });
 
 client.interceptors.request.use(async (config) => {
-  const token = await SecureStore.getItemAsync(TOKEN_KEY);
+  const token = await TokenStorage.getItemAsync(TOKEN_KEY);
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -32,7 +32,7 @@ client.interceptors.response.use(
     const status = error.response?.status;
 
     if (status === 401) {
-      await SecureStore.deleteItemAsync(TOKEN_KEY);
+      await TokenStorage.deleteItemAsync(TOKEN_KEY);
       emit("unauthorized");
     }
 

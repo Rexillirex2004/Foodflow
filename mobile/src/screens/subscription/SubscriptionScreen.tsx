@@ -35,7 +35,7 @@ export function SubscriptionScreen({ blocking = false }: { blocking?: boolean })
     EXPIRED: "Vencida",
     CANCELED: "Cancelada",
   };
-  const statusColor = isSubscriptionUsable ? colors.primary : colors.danger;
+  const statusColor = isSubscriptionUsable ? colors.success : colors.danger;
 
   return (
     <Screen>

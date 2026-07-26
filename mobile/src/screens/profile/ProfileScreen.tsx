@@ -28,7 +28,7 @@ export function ProfileScreen({ navigation }: Props) {
           <Text style={{ color: colors.text, fontWeight: "600" }}>Suscripción</Text>
           <Badge
             text={isSubscriptionUsable ? "Activa" : "Vencida"}
-            color={isSubscriptionUsable ? colors.primary : colors.danger}
+            color={isSubscriptionUsable ? colors.success : colors.danger}
           />
         </View>
         <Text style={{ color: colors.subtext, marginTop: 4 }}>Plan: {subscription?.planName}</Text>

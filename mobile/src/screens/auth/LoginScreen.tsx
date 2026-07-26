@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import { Alert, Text } from "react-native";
+import { Alert, Text, View } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useAuth } from "../../context/AuthContext";
 import { AuthStackParamList } from "../../navigation/types";
 import { Screen, Title, Subtitle, Input, Button, colors } from "../../components/ui";
+import { Logo } from "../../components/Logo";
 
 type Props = NativeStackScreenProps<AuthStackParamList, "Login">;
 
@@ -26,7 +27,21 @@ export function LoginScreen({ navigation }: Props) {
 
   return (
     <Screen>
-      <Title>FoodFlow</Title>
+      <View style={{ alignItems: "center", marginTop: 16, marginBottom: 4 }}>
+        <Logo size={76} />
+        <Title>FoodFlow</Title>
+        <Text
+          style={{
+            color: colors.primary,
+            fontFamily: "Poppins_600SemiBold",
+            fontSize: 14,
+            marginTop: 2,
+            marginBottom: 10,
+          }}
+        >
+          El flujo inteligente de tu restaurante
+        </Text>
+      </View>
       <Subtitle>Inicia sesión para administrar tu restaurante</Subtitle>
 
       <Input
@@ -35,7 +50,7 @@ export function LoginScreen({ navigation }: Props) {
         keyboardType="email-address"
         value={email}
         onChangeText={setEmail}
-        style={{ marginTop: 24 }}
+        style={{ marginTop: 20 }}
       />
       <Input placeholder="Contraseña" secureTextEntry value={password} onChangeText={setPassword} />
 

@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { Alert, FlatList, Pressable, Text, View } from "react-native";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { Alert, FlatList, Modal, Pressable, Text, View } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { TablesStackParamList } from "../../navigation/types";
 import { MenuItem, Order } from "../../types/models";
@@ -19,12 +19,16 @@ const NEXT_STATUS: Record<string, "IN_PROGRESS" | "SERVED"> = {
   READY: "SERVED",
 };
 
-export function OrderScreen({ route }: Props) {
+export function OrderScreen({ route, navigation }: Props) {
   const { orderId } = route.params;
   const [order, setOrder] = useState<Order | null>(null);
   const [availableItems, setAvailableItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
+  const [emptyOrderPromptVisible, setEmptyOrderPromptVisible] = useState(false);
+  const [resolvingPrompt, setResolvingPrompt] = useState(false);
+  const allowLeaveRef = useRef(false);
+  const pendingLeaveActionRef = useRef<unknown>(null);
 
   const load = useCallback(async () => {
     if (!orderId) return;
@@ -43,6 +47,46 @@ export function OrderScreen({ route }: Props) {
   useEffect(() => {
     load();
   }, [load]);
+
+  // Si el usuario intenta salir de la mesa sin haber registrado ningún
+  // producto, se le pregunta qué hacer en vez de dejarla "Ocupada" sin más.
+  useEffect(() => {
+    const unsubscribe = navigation.addListener("beforeRemove", (e) => {
+      if (allowLeaveRef.current) return;
+      if (!order || order.status !== "OPEN" || order.items.length > 0) return;
+
+      e.preventDefault();
+      pendingLeaveActionRef.current = e.data.action;
+      setEmptyOrderPromptVisible(true);
+    });
+
+    return unsubscribe;
+  }, [navigation, order]);
+
+  function leaveNow() {
+    allowLeaveRef.current = true;
+    setEmptyOrderPromptVisible(false);
+    if (pendingLeaveActionRef.current) {
+      navigation.dispatch(pendingLeaveActionRef.current as never);
+    }
+  }
+
+  async function handleReleaseTable() {
+    if (!order) return;
+    setResolvingPrompt(true);
+    try {
+      await ordersApi.updateOrderStatus(order.id, "CANCELLED");
+    } catch {
+      // si falla la cancelación, igual dejamos salir de la pantalla
+    } finally {
+      setResolvingPrompt(false);
+    }
+    leaveNow();
+  }
+
+  function handleKeepOccupied() {
+    leaveNow();
+  }
 
   async function handleAdd(item: MenuItem) {
     if (!order) return;
@@ -150,7 +194,7 @@ export function OrderScreen({ route }: Props) {
                 <Card>
                   <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
                     <Text style={{ color: colors.text }}>{item.name}</Text>
-                    <Text style={{ color: colors.primary, fontWeight: "700" }}>+ ${item.price.toFixed(2)}</Text>
+                    <Text style={{ color: colors.success, fontWeight: "700" }}>+ ${item.price.toFixed(2)}</Text>
                   </View>
                 </Card>
               </Pressable>
@@ -158,6 +202,34 @@ export function OrderScreen({ route }: Props) {
           />
         </>
       )}
+
+      <Modal visible={emptyOrderPromptVisible} transparent animationType="fade">
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "rgba(59,44,34,0.45)",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 24,
+          }}
+        >
+          <Card style={{ width: "100%", maxWidth: 360, marginBottom: 0 }}>
+            <Text style={{ color: colors.text, fontSize: 16, fontFamily: "Poppins_600SemiBold", marginBottom: 8 }}>
+              Pedido vacío
+            </Text>
+            <Text style={{ color: colors.subtext, fontSize: 14, lineHeight: 20 }}>
+              No se registró ningún producto para esta mesa. ¿Qué deseas hacer?
+            </Text>
+            <Button
+              title="Liberar mesa"
+              variant="danger"
+              onPress={handleReleaseTable}
+              loading={resolvingPrompt}
+            />
+            <Button title="Mantener ocupada" variant="secondary" onPress={handleKeepOccupied} disabled={resolvingPrompt} />
+          </Card>
+        </View>
+      </Modal>
     </Screen>
   );
 }
