@@ -122,7 +122,7 @@ export async function updateOrderStatus(
   const order = await prisma.order.findFirst({ where: { id: orderId, restaurantId } });
   if (!order) throw ApiError.notFound("Pedido no encontrado");
 
-  const allowed = TRANSITIONS[order.status].find((t) => t.to === nextStatus);
+  const allowed = TRANSITIONS[order.status as OrderStatus].find((t) => t.to === nextStatus);
   if (!allowed) {
     throw ApiError.badRequest(`No se puede pasar de ${order.status} a ${nextStatus}`);
   }

@@ -4,6 +4,7 @@ import { signToken } from "../../lib/jwt";
 import { ApiError } from "../../utils/apiError";
 import { env } from "../../config/env";
 import { RegisterInput, LoginInput } from "./auth.validation";
+import { Role } from "../../types/enums";
 
 export async function register(input: RegisterInput) {
   const existing = await prisma.user.findUnique({ where: { email: input.email } });
@@ -38,7 +39,7 @@ export async function register(input: RegisterInput) {
   });
 
   const owner = restaurant.users[0];
-  const token = signToken({ sub: owner.id, restaurantId: restaurant.id, role: owner.role });
+  const token = signToken({ sub: owner.id, restaurantId: restaurant.id, role: owner.role as Role });
 
   return { token, user: sanitizeUser(owner), restaurant: sanitizeRestaurant(restaurant), subscription: restaurant.subscription };
 }
@@ -58,7 +59,7 @@ export async function login(input: LoginInput) {
     throw ApiError.unauthorized("Credenciales inválidas");
   }
 
-  const token = signToken({ sub: user.id, restaurantId: user.restaurantId, role: user.role });
+  const token = signToken({ sub: user.id, restaurantId: user.restaurantId, role: user.role as Role });
 
   return {
     token,
